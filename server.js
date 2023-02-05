@@ -5,6 +5,9 @@ const cors = require('cors')
 const {Server} = require('socket.io')
 app.use(cors())
 
+app.get('/',(req,res)=>{
+    res.send("Server is working fine..👍")
+})
 const server = http.createServer(app)
 const io = new Server(server,{
     cors:{
@@ -21,16 +24,21 @@ io.on("connection",socket => {
         {
             users[socket.id] = user
         }
-        socket.broadcast.emit("user-joined",user)
+        socket.volatile.broadcast.emit("user-joined",user)
     })
 
     socket.on("send-message",(data,user) =>{
-        socket.broadcast.emit("receive-message",data,user)
+        socket.volatile.broadcast.emit("receive-message",data,user)
+        socket.join(user)
     })
 
     socket.on("disconnect",()=>{
-        socket.broadcast.emit("user-left",users[socket.id])
+        if(users[socket.id] != null)
+        {
+            socket.volatile.broadcast.emit("user-left",users[socket.id])
+        }
         delete(users[socket.id])
+        console.log("user disconnected")
     })
 })
 
