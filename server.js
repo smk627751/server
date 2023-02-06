@@ -24,18 +24,18 @@ io.on("connection",socket => {
         {
             users[socket.id] = user
         }
-        socket.volatile.broadcast.emit("user-joined",user)
+        socket.broadcast.emit("user-joined",user)
     })
 
     socket.on("send-message",(data,user) =>{
-        socket.volatile.broadcast.emit("receive-message",data,user)
+        socket.broadcast.emit("receive-message",data,user)
         socket.join(user)
     })
 
     socket.on("disconnect",()=>{
         if(users[socket.id] != null)
         {
-            socket.volatile.broadcast.emit("user-left",users[socket.id])
+            socket.broadcast.emit("user-left",users[socket.id])
         }
         delete(users[socket.id])
         console.log("user disconnected")
