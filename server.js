@@ -17,28 +17,29 @@ const io = new Server(server,{
 })
 
 const users = []
+var Rooms = [];
 io.on("connection",socket => {
 
-    socket.on("new-user",user => {
-        if(user != null)
-        {
-            users[socket.id] = user
-        }
-        socket.broadcast.emit("user-joined",user)
+    socket.on("new-user",(user,room) => {
+        socket.join(room)
+        users[socket.id] = user
+        Rooms [socket.id]= room
+        socket.broadcast.to(room).emit("user-joined",user)
     })
 
-    socket.on("send-message",(data,user) =>{
-        socket.broadcast.emit("receive-message",data,user)
+    socket.on("send-message",(data,user,room) =>{
+        socket.broadcast.to(room).emit("receive-message",data,user)
         socket.join(user)
     })
 
     socket.on("disconnect",()=>{
         if(users[socket.id] != null)
         {
-            socket.broadcast.emit("user-left",users[socket.id])
+            socket.broadcast.to(Rooms[socket.id]).emit("user-left",users[socket.id])
         }
         delete(users[socket.id])
-        console.log("user disconnected")
+        delete(Rooms[socket.id])
+        console.log(`user disconnected`)
     })
 })
 
