@@ -57,8 +57,9 @@ io.on("connection",socket => {
 
     socket.on("new-user",async (user,room,photoURL) => {
         socket.join(room)
+        users[socket.id] = user
         const rooms = await addRoom(user,room,photoURL)
-        socket.broadcast.to(room).emit("user-joined",user)
+        socket.broadcast.emit("user-joined",user)
         socket.broadcast.emit("rooms",rooms)
         socket.emit("rooms",rooms)
     })
@@ -70,18 +71,19 @@ io.on("connection",socket => {
     socket.on("send-message",async(data,user,from,room) =>{
         const res = await addChat(data,user,from,room)
         socket.broadcast.to(room).emit("receive-message",data,user)
+        socket.broadcast.to(room).emit("notify-message",data,user)
         socket.join(user)
     })
 
     socket.on("disconnect",()=>{
         if(users[socket.id] != null)
         {
-            socket.broadcast.to(Rooms[socket.id]).emit("user-left",users[socket.id])
+            socket.broadcast.emit("user-left",users[socket.id])
         }
         // deleteRoom()
-        // console.log(`user disconnected`)
+        console.log(`user disconnected`)
     })
 })
 
-const port = process.env.port || 5000
+const port = process.env.PORT || 5000
 server.listen(port)
