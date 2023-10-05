@@ -75,6 +75,16 @@ io.on("connection",socket => {
         socket.join(user)
     })
 
+    socket.on("get-peer",(room) => {
+        // console.log(room)
+        socket.broadcast.to(room).emit("send-peer")
+    })
+
+    socket.on("remote-peer",(data) => {
+        // console.log(data)
+        socket.broadcast.emit("receive-peerId",data.peerId)
+    })
+
     socket.on("disconnect",()=>{
         if(users[socket.id] != null)
         {
