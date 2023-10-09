@@ -68,21 +68,21 @@ io.on("connection",socket => {
         socket.broadcast.to(room).emit("set-message",chats)
         socket.emit("set-message",chats)
     })
-    socket.on("send-message",async(data,user,from,room) =>{
+    socket.on("send-message",async(data,photoURL,user,from,room) =>{
         const res = await addChat(data,user,from,room)
         socket.broadcast.to(room).emit("receive-message",data,user)
-        socket.broadcast.to(room).emit("notify-message",data,user)
+        socket.broadcast.to(room).emit("notify-message",data,photoURL,user)
         socket.join(user)
     })
 
-    socket.on("get-peer",(room) => {
-        // console.log(room)
-        socket.broadcast.to(room).emit("send-peer")
+    socket.on("get-peer",(data) => {
+        // console.log(data)
+        socket.broadcast.to(data.room).emit("send-peer",(data.from))
     })
 
     socket.on("remote-peer",(data) => {
         // console.log(data)
-        socket.broadcast.emit("receive-peerId",data.peerId)
+        socket.broadcast.to(data.from).emit("receive-peerId",data.peerId)
     })
 
     socket.on("disconnect",()=>{
